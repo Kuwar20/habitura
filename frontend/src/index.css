@@ -1,0 +1,106 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Entry Button */
+.entryBtn {
+  @apply relative text-lg font-bold text-coolsecondary shadow-[0_0_0_#fec1958c] transition-all duration-[0.3s] ease-[ease-in-out] cursor-pointer px-[35px] py-3 rounded-lg border-[3px] border-solid border-coolsecondary hover:text-lightgreen hover:shadow-[0_0_25px_#fec1958c];
+}
+
+.star-1,
+.star-2,
+.star-3,
+.star-4,
+.star-5,
+.star-6 {
+  @apply absolute h-auto z-[-5] transition-all;
+}
+
+.star-1 {
+  @apply w-[25px] duration-[1s] ease-[cubic-bezier(0.05,0.83,0.43,0.96)] left-[20%] top-[20%];
+  filter: drop-shadow(0 0 0 #fffdef);
+}
+
+.star-2 {
+  @apply w-[15px] duration-[1s] ease-[cubic-bezier(0,0.4,0,1.01)] left-[45%] top-[45%];
+  filter: drop-shadow(0 0 0 #fffdef);
+}
+
+.star-3 {
+  @apply w-[5px] duration-[1s] ease-[cubic-bezier(0,0.4,0,1.01)] left-[40%] top-[40%];
+  filter: drop-shadow(0 0 0 #fffdef);
+}
+
+.star-4 {
+  @apply w-2 duration-[0.8s] ease-[cubic-bezier(0,0.4,0,1.01)] left-[40%] top-[20%];
+  filter: drop-shadow(0 0 0 #fffdef);
+}
+
+.star-5 {
+  @apply w-[15px] duration-[0.6s] ease-[cubic-bezier(0,0.4,0,1.01)] left-[45%] top-1/4;
+  filter: drop-shadow(0 0 0 #fffdef);
+}
+
+.star-6 {
+  @apply w-[5px] duration-[0.8s] ease-[ease] left-2/4 top-[5%];
+  filter: drop-shadow(0 0 0 #fffdef);
+}
+
+.entryBtn:hover {
+  background: transparent;
+}
+
+.entryBtn:hover .star-1 {
+  @apply top-[-80%] left-[-30%] w-[25px] z-[2];
+  filter: drop-shadow(0 0 10px #fffdef);
+}
+
+.entryBtn:hover .star-2 {
+  @apply w-[15px] z-[2] left-[10%] -top-1/4;
+  filter: drop-shadow(0 0 10px #fffdef);
+}
+
+.entryBtn:hover .star-3 {
+  @apply w-[5px] z-[2] left-1/4 top-[55%];
+  filter: drop-shadow(0 0 10px #fffdef);
+}
+
+.entryBtn:hover .star-4 {
+  @apply w-2 z-[2] left-[80%] top-[30%];
+  filter: drop-shadow(0 0 10px #fffdef);
+}
+
+.entryBtn:hover .star-5 {
+  @apply w-[15px] z-[2] left-[115%] top-1/4;
+  filter: drop-shadow(0 0 10px #fffdef);
+}
+
+.entryBtn:hover .star-6 {
+  @apply w-[5px] z-[2] left-[60%] top-[5%];
+  filter: drop-shadow(0 0 10px #fffdef);
+}
+
+.fil0 {
+  @apply fill-[#fffdef];
+}
+
+/************************ Custom scrollbar ******************************/
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #829c9c;
+  border-radius: 10px;
+  border: 1px solid #f1f1f1;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: #556e6e;
+}
