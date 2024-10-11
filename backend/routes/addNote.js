@@ -2,6 +2,10 @@ const express = require("express");
 const router = express.Router();
 const passport = require("passport");
 const Note = require("../models/addNoteSchema");
+const Redis = require("ioredis");
+const redis = new Redis();
+
+// use debounce/ throttle
 
 router.post(
   "/note",
@@ -13,19 +17,23 @@ router.post(
     if (!user) {
       return res.status(401).json({ message: "Unauthorized. Please log in." });
     }
-
     try {
-      let existingNote = await Note.findOne({ user: user._id });
+      const userId = req.user._id;
+      const updatedNote = await Note.findOneAndUpdate(
+        { user: user._id },
+        { note },
+        { new: true, upsert: true }
+      );
 
-      if (existingNote) {
-        existingNote.note = note;
-        await existingNote.save();
-      } else {
-        existingNote = new Note({ note, user: user._id });
-        await existingNote.save();
-      }
+      // Cache the updated note in Redis
+      // await redis.set(
+      //   `note:${userId}`,
+      //   JSON.stringify(updatedNote),
+      //   "EX",
+      //   3600
+      // );
 
-      res.status(200).json({ message: "Note saved", note });
+      res.status(200).json({ message: "Note saved", updatedNote });
     } catch (error) {
       console.error("Error adding/updating note:", error);
       res.status(400).json({ error: error.message });
@@ -33,27 +41,43 @@ router.post(
   }
 );
 
-
-router.get('/getNote', passport.authenticate("jwt", { session: false }), 
-async (req, res) => {
-  const user = req.user;  // Extract the authenticated user from the request
-  if (!user) {
-    return res.status(401).json({ message: "Unauthorized. Please log in." });
-  }
-
-  try {
-    const note = await Note.find({ user: user._id });
-
-    if (!note) {
-      return res.status(404).json({ message: "Note not found." });
+router.get(
+  "/getNote",
+  passport.authenticate("jwt", { session: false }),
+  async (req, res) => {
+    const user = req.user;
+    if (!user) {
+      return res.status(401).json({ message: "Unauthorized. Please log in." });
     }
 
-    res.status(200).json({ message: "My Notes", note });
-  } catch (error) {
-    console.error("Error getting note:", error);
-    res.status(400).json({ error: error.message });
-  }
-});
+    try {
+      // Check Redis cache first
+      // const cachedNote = await redis.get(`note:${user._id}`);
+      // if (cachedNote) {
+      //   return res
+      //     .status(200)
+      //     .json({ message: "My Notes", note: JSON.parse(cachedNote) });
+      // }
 
+      const note = await Note.find({ user: user._id });
+      if (!note) {
+        return res.status(404).json({ message: "Note not found." });
+      }
+
+      // Cache the retrieved notes
+      // await redis.set(
+      //   `note:${user._id}`,
+      //   JSON.stringify(notes),
+      //   "EX",
+      //   3600
+      // );
+
+      res.status(200).json({ message: "My Notes", note });
+    } catch (error) {
+      console.error("Error getting note:", error);
+      res.status(400).json({ error: error.message });
+    }
+  }
+);
 
 module.exports = router;

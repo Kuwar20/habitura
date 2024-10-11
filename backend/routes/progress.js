@@ -11,39 +11,64 @@ router.get(
     try {
       const user = req.user;
 
-      // Fetch the user with populated habit and task lists
-      const getUser = await User.findById(user._id)
-        .populate("habitList")
-        .populate("taskList");
+      // Using aggregation to fetch user, habits, and tasks in one go
+      const userWithProgress = await User.aggregate([
+        { $match: { _id: user._id } },
+        {
+          $lookup: {
+            from: "habits", 
+            localField: "habitList",
+            foreignField: "_id",
+            as: "habits",
+          },
+        },
+        {
+          $lookup: {
+            from: "tasks", 
+            localField: "taskList",
+            foreignField: "_id",
+            as: "tasks",
+          },
+        },
+        {
+          $project: {
+            totalHabits: { $size: "$habits" },
+            totalTasks: { $size: "$tasks" },
+            completedHabits: {
+              $size: {
+                $filter: {
+                  input: "$habits",
+                  as: "habit",
+                  cond: { $eq: ["$$habit.isCompleted", true] },
+                },
+              },
+            },
+            completedTasks: {
+              $size: {
+                $filter: {
+                  input: "$tasks",
+                  as: "task",
+                  cond: { $eq: ["$$task.isCompleted", true] },
+                },
+              },
+            },
+          },
+        },
+      ]);
 
-      if (!getUser) {
+      if (!userWithProgress.length) {
         return res.status(404).json({ message: "User not found" });
       }
 
-      // Calculate total daily tasks and completed tasks
-      const totalHabits = getUser.habitList.length;
-      const totalTasks = getUser.taskList.length;
+      const { totalHabits, totalTasks, completedHabits, completedTasks } = userWithProgress[0];
       const totalDailyTasks = totalHabits + totalTasks;
 
       if (totalDailyTasks === 0) {
-        return res
-          .status(200)
-          .json({ message: "No tasks or habits found for today" });
+        return res.status(200).json({ message: "No tasks or habits found for today" });
       }
 
-      // Filter completed habits and tasks
-      const habitIsCompleted = getUser.habitList.filter(
-        (habit) => habit.isCompleted
-      );
-      const totalHabitCompleted = habitIsCompleted.length;
-
-      const taskIsCompleted = getUser.taskList.filter(
-        (task) => task.isCompleted
-      );
-      const totalTaskCompleted = taskIsCompleted.length;
-
-      // Calculate total daily tasks completed and progress
-      const totalDailyTasksCompleted = totalHabitCompleted + totalTaskCompleted;
+      // Calculate progress
+      const totalDailyTasksCompleted = completedHabits + completedTasks;
       let todayProgress = (totalDailyTasksCompleted / totalDailyTasks) * 100;
       todayProgress = parseFloat(todayProgress.toFixed(2));
 
@@ -76,10 +101,10 @@ router.get(
 
       return res.status(200).json({
         message: "All Progress Data:",
-        allProgress, 
+        allProgress,
       });
     } catch (error) {
-      console.error(error); 
+      console.error(error);
       return res.status(500).json({
         message: "An error occurred while calculating daily progress",
         error: error.message,

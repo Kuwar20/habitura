@@ -3,11 +3,13 @@ const User = require("../models/userSchema");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const passport = require("passport");
+const { loginLimiter, signupLimiter } = require("../middleware/rateLimiter");
 const router = express.Router();
 require("dotenv").config();
 
+
 // Signup route
-router.post("/signup", async (req, res) => {
+router.post("/signup", signupLimiter , async (req, res) => {
   try {
     const { fullname, email, password } = req.body;
     if (!fullname || !email || !password) {
@@ -45,7 +47,7 @@ router.post("/signup", async (req, res) => {
 });
 
 // Login route
-router.post("/login", async (req, res) => {
+router.post("/login", loginLimiter, async (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) {
     return res.status(400).json({ error: "All fields are required" });
@@ -74,35 +76,31 @@ router.post("/login", async (req, res) => {
 });
 
 // social media logins
-router.post("/socialLogin", async (req, res) => {
+router.post("/socialLogin", loginLimiter, async (req, res) => {
   const { name, email, platform, id, profilePicture } = req.body;
 
   try {
-    // Check if the user already exists in the database
     let user = await User.findOne({ email });
 
     if (user) {
-      // See if the given platform is already present with the email
       const existingLogin = user.socialLogins.find(
         (item) => item.platform === platform && item.id === id
       );
 
       if (existingLogin) {
-        // If the platform and ID match, log the user in
-        const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET_KEY, {
+        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET_KEY, {
           expiresIn: "10d",
         });
 
         return res.status(200).json({ success: true, user, token });
       } else {
-        // If platform and ID do not match, add the new social login to the user's account
         user.socialLogins.push({ platform, id });
         user.fullname = name;
         user.profilePicture = profilePicture;
 
         await user.save();
 
-        const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET_KEY, {
+        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET_KEY, {
           expiresIn: "10d",
         });
 
@@ -110,7 +108,6 @@ router.post("/socialLogin", async (req, res) => {
       }
     }
 
-    // If no user exists, create a new one
     const newUser = new User({
       email,
       fullname: name,
@@ -119,7 +116,7 @@ router.post("/socialLogin", async (req, res) => {
     });
 
     await newUser.save();
-    const token = jwt.sign({ userId: newUser._id }, process.env.JWT_SECRET_KEY, {
+    const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET_KEY, {
       expiresIn: "10d",
     });
 
@@ -129,6 +126,5 @@ router.post("/socialLogin", async (req, res) => {
     res.status(500).json({ success: false, error: "Error saving user" });
   }
 });
-
 
 module.exports = router;

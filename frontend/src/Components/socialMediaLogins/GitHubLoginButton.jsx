@@ -7,7 +7,7 @@ import { useCookies } from "react-cookie";
 import { useNavigate } from "react-router-dom";
 
 const GitHubLoginButton = () => {
-  const navigate = useNavigate(); // React Router hook to navigate to the dashboard
+  const navigate = useNavigate(); 
   const [cookie, setCookie] = useCookies(["token"]);
 
   const handleGitHubLogin = async () => {

@@ -10,7 +10,7 @@ const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>
     <GoogleOAuthProvider
-      clientId="936824643369-d1m2v349dq4185t8rbs5ci1mu37q8glg.apps.googleusercontent.com"
+      clientId="995654821445-e23ei3n6q8a5cfj47nujd20g8b5ii2f6.apps.googleusercontent.com"
       redirectUri="http://localhost:3000"
     >
       <Router>

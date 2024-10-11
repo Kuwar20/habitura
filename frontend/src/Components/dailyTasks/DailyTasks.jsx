@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import Card from "./Card";
 import {
   makeAuthenticatedDELETERequest,
@@ -16,6 +16,7 @@ import { IoMdAdd } from "react-icons/io";
 import { Toast, ToastProvider } from "../common/Toast";
 import PageHeading from "../common/PageHeading";
 import { TiRefreshOutline } from "react-icons/ti";
+import { throttle } from "../../utils/throttleandDebounce";
 
 const DailyTasks = () => {
   const [listOfHabits, setListOfHabits] = useState([]);
@@ -96,6 +97,7 @@ const DailyTasks = () => {
 
       // console.log("Task added successfully", response);
       Toast.success("Task added successfully.");
+      await getTasklist();
     } catch (error) {
       console.error("Error adding task", error);
     }
@@ -126,6 +128,7 @@ const DailyTasks = () => {
       );
       Toast.success("Task deleted successfully.");
       // console.log(response);
+      await getTasklist();
     } catch (error) {
       console.error("Error deleting task:", error);
       // error && Toast.error("Failed to delete task");
@@ -147,12 +150,13 @@ const DailyTasks = () => {
         `/task/updateTask/${taskId}`,
         { task: task }
       );
-      console.log(response);
+      // console.log(response);
       setIsUpdating(false);
       setTask("");
       setKey("");
       setUpdateTaskId(null);
       Toast.success("Task updated successfully.");
+      await getTasklist();
     } catch (error) {
       console.error("Error updating task:", error);
       Toast.error("Failed to update task.");
@@ -174,10 +178,14 @@ const DailyTasks = () => {
     await isCheckedHelper("/task/statusUpdate", id, isChecked);
   };
 
-  useEffect(() => {
-    getMyHabits();
-    getTasklist();
-  }, [listOfTasks, listOfHabits]);
+  // Throttled Get Tasks and Habits
+  const throttledGetMyTasks = useCallback(throttle(getTasklist, 100000, []))
+  const throttledGetMyHabits = useCallback(throttle(getMyHabits, 100000, []))
+
+  useEffect(()=>{
+    throttledGetMyHabits();
+    throttledGetMyTasks();
+  },[])
 
   return (
     <div className="">

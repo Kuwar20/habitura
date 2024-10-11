@@ -16,14 +16,14 @@ const Dashboard = () => {
         </div>
 
         {/* Stats - right */}
-        <div className="grid grid-rows-2 gap-3">
+        <div className="grid grid-rows-3 gap-3">
           {/* Bar graph daily status */}
-          <div className="bg-cyan-50 max-h-full rounded-md shadow-md p-pagePadding">
+          <div className="bg-cyan-50 max-h-full rounded-md shadow-md p-2">
             <DailyProgress />
           </div>
 
           {/* My notes */}
-          <div className=" max-h-full rounded-md shadow-md overflow-y-auto custom-scrollbar">
+          <div className="row-span-2 max-h-full rounded-md shadow-md ">
             <MyNote/>
           </div>
         </div>

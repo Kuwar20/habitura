@@ -14,7 +14,7 @@ const Sidebar = () => {
             width={50}
             className="rounded-full"
           />
-          <div className="text-4xl text-coolsecondary font-logo font-light">
+          <div className="text-4xl text-coolsecondary font-logo font-light mt-3">
             Habitura
           </div>
         </div>

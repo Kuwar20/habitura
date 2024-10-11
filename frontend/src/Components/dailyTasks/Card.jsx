@@ -36,7 +36,7 @@ const Card = ({
       label: "Update",
       icon: <UploadOutlined />,
       onClick: () => {
-        console.log("Upload clicked");
+        // console.log("Upload clicked");
         updateTask(taskId, task);
       },
     },

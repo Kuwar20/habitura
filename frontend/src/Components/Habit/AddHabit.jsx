@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import InputHabit from "../formInputs/InputHabit";
 import { IoMdAdd } from "react-icons/io";
 import HabitCard from "./HabitCard";
@@ -10,6 +10,7 @@ import {
   makeAuthenticatedPOSTRequest,
 } from "../../utils/serverHelpers";
 import LoadingSpinner from "../common/LoadingSpinner";
+import { throttle } from "../../utils/throttleandDebounce";
 
 const AddHabit = () => {
   const [habitData, setHabitData] = useState({
@@ -104,6 +105,7 @@ const AddHabit = () => {
       setListOfHabits((prevHabits) =>
         prevHabits.filter((habit) => habit._id !== id)
       );
+      // await getMyHabits();
     } catch (error) {
       console.error("Failed to delete habit", error);
       Toast.error(
@@ -114,8 +116,11 @@ const AddHabit = () => {
     }
   };
 
+  // Throttle getMyHabits to avoid excessive calls
+  const throttledGetMyHabits = useCallback(throttle(getMyHabits, 10000), []);
+
   useEffect(() => {
-    getMyHabits();
+    throttledGetMyHabits();
   }, []);
 
   return (
@@ -146,7 +151,6 @@ const AddHabit = () => {
           onChange={(date) => handleDateChange(date, "endDate")}
           dateLabel={"End Date"}
           title={"Enter End Date"}
-
         />
 
         <button

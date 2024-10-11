@@ -8,6 +8,7 @@ import { Toast, ToastProvider } from "../common/Toast";
 import OutsideClickHandler from "react-outside-click-handler";
 
 const UpdateHabit = ({ habitDetails, isPopUp, setIsPopUp, getMyHabits }) => {
+  const [key, setKey] = useState("");
   const [habitData, setHabitData] = useState({
     habit: "",
     startDate: new Date(),
@@ -20,7 +21,6 @@ const UpdateHabit = ({ habitDetails, isPopUp, setIsPopUp, getMyHabits }) => {
       endDate: habitDetails.endDate,
     });
   }, [habitDetails]);
-
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -37,6 +37,7 @@ const UpdateHabit = ({ habitDetails, isPopUp, setIsPopUp, getMyHabits }) => {
     }));
   };
 
+  // Update habits
   const updateHabit = async () => {
     try {
       const response = await makeAuthenticatedPUTRequest(
@@ -53,12 +54,24 @@ const UpdateHabit = ({ habitDetails, isPopUp, setIsPopUp, getMyHabits }) => {
     }
   };
 
+  const handleKeyDown = (e) => {
+    setKey(e.key);
+    if (e.key === "Enter") {
+      updateHabit();
+    }
+  };
+
   return (
     <>
-      <OutsideClickHandler onOutsideClick={(e) => {setIsPopUp(false); e.stopPropagation()}}>
+      <OutsideClickHandler
+        onOutsideClick={(e) => {
+          setIsPopUp(false);
+          e.stopPropagation();
+        }}
+      >
         <ToastProvider />
         <div
-          className={`fixed top-[50%] left-[55%] w-[60%] h-[60%] flex justify-center items-center bg-darkestgreen bg-opacity-50 z-50 transform -translate-x-1/2 -translate-y-1/2 shadow-md rounded-sm ${
+          className={`fixed top-[50%] left-[55%] w-[60%] h-[70%] flex justify-center items-center bg-darkestgreen bg-opacity-50 z-50 transform -translate-x-1/2 -translate-y-1/2 shadow-md rounded-sm ${
             isPopUp ? "block" : "hidden"
           } `}
         >
@@ -80,6 +93,8 @@ const UpdateHabit = ({ habitDetails, isPopUp, setIsPopUp, getMyHabits }) => {
                 value={habitData.habit}
                 onChange={handleChange}
                 placeholder={"Eg. Wake Up at 5 AM."}
+                onKeyDown={handleKeyDown}
+                className="p-3"
               />
 
               <Datepicker
@@ -97,12 +112,13 @@ const UpdateHabit = ({ habitDetails, isPopUp, setIsPopUp, getMyHabits }) => {
 
             {/* button */}
             <button
-              className="bg-darkgreen flex justify-center items-center text-white text-lg font-medium px-4 py-2 cursor-pointer hover:bg-secondary transition-colors duration-300 rounded-md"
+              className="bg-habit flex justify-center items-center text-white text-lg font-medium px-4 py-2 cursor-pointer hover:bg-[#1c7082] transition-colors duration-300 rounded-md"
               onClick={updateHabit}
             >
               <GrDocumentUpdate className="text-2xl mr-2" />
               Update
             </button>
+
           </div>
         </div>
       </OutsideClickHandler>

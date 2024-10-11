@@ -1,29 +1,16 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { MdDeleteForever } from "react-icons/md";
 import { RxUpdate } from "react-icons/rx";
 import { BsInfoLg } from "react-icons/bs";
 import UpdateHabit from "./UpdateHabit";
 import { Link } from "react-router-dom";
+import { makeAuthenticatedGETRequest } from "../../utils/serverHelpers";
+import { debounce } from "../../utils/throttleandDebounce";
 
 const HabitCard = ({ habitDetails, deleteHabit, getMyHabits }) => {
   const [isUpdating, setIsUpadting] = useState(false);
   const [isPopUp, setIsPopUp] = useState(false);
-
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString("default", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
-  };
-
-  // calculate days difference
-  const calculateDateDifference = (startDate, endDate) => {
-    const diffTime = Math.abs(new Date(endDate) - new Date(startDate));
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays;
-  };
+  const [habitCal, setHabitCal] = useState(null);
 
   const hasDates = habitDetails.startDate && habitDetails.endDate;
   const isOngoing = habitDetails.startDate && !habitDetails.endDate;
@@ -39,78 +26,48 @@ const HabitCard = ({ habitDetails, deleteHabit, getMyHabits }) => {
     setIsPopUp(true);
   };
 
-  // Challenge completion
-  const challenge = () => {
-    const completedDays = habitDetails.completionDates.length;
-    const totalDays = calculateDateDifference(
-      habitDetails.startDate,
-      habitDetails.endDate
-    );
-
-    // Edge case: prevent division by zero if totalDays is 0
-    if (totalDays === 0) return "Invalid date range";
-
-    if (completedDays === totalDays) {
-      return "🏆 Challenge completed";
-    }
-
-    if (completedDays < totalDays) {
-      // Return the fraction of completed days
-      return `🎯 ${completedDays} / ${totalDays} Days Challenge`;
+  // get habit with calculations from backend
+  const getHabitWithCalculations = async () => {
+    try {
+      const response = await makeAuthenticatedGETRequest(
+        `/habit/getHabitDetails/${habitDetails._id}`
+      );
+      setHabitCal(response);
+    } catch (error) {
+      console.error("Error fetching habit details:", error);
     }
   };
 
-  // Streak Track
-  const streakTracking = () => {
-    const streakDateHistory = habitDetails.completionDates || [];
-    let currentStreak = 0;
-    let maxStreak = 0;
-
-    if (streakDateHistory.length === 0) {
-      return "🌱 Let's grow!";
+ // Debounced effect to prevent excessive fetching
+ const debouncedFetchHabit = useCallback(
+  debounce(() => {
+    if (habitDetails && habitDetails._id) {
+      getHabitWithCalculations();
     }
+  }, 300), // Adjust the debounce delay as necessary
+  [habitDetails] // Dependencies for the fetch
+);
 
-    for (let i = 0; i < streakDateHistory.length; i++) {
-      if (i === 0) {
-        currentStreak = 1;
-      } else {
-        const previousDate = new Date(streakDateHistory[i - 1]).setHours(
-          0,
-          0,
-          0,
-          0
-        );
-        const currentDate = new Date(streakDateHistory[i]).setHours(0, 0, 0, 0);
+useEffect(() => {
+  console.log("Re-render on keydown");
+  debouncedFetchHabit(); // Call the debounced fetch function
+}, [habitDetails]);
 
-        // Calculate difference in days
-        const dayDifference =
-          (currentDate - previousDate) / (1000 * 60 * 60 * 24);
-
-        if (dayDifference === 1) {
-          currentStreak++;
-        } else {
-          currentStreak = 1;
-        }
-      }
-      maxStreak = Math.max(currentStreak, maxStreak);
-    }
-
-    return maxStreak === 1 ? "🔥 1 Day Streak" : `🔥 ${maxStreak} Days Streak`;
-  };
-
+  // Log habitCalculation when it updates
   useEffect(() => {
-    console.log("Re-render on keydown");
-    // console.log(habitDetails);
-  }, [habitDetails]);
+    if (habitCal) {
+      console.log("Updated habitCal:", habitCal);
+    }
+  }, []);
 
   return (
     <div className="flex flex-col justify-between items-start space-y-4 pt-7 bg-[#fde2e4] p-3 font-medium  rounded-md shadow-md hover:shadow-xl transition-shadow duration-300 relative">
       {/* Challenge Title */}
       <div className="text-sm text-white font-medium absolute top-0 right-0 p-2 rounded-tr-md rounded-bl-md bg-habit">
         {hasDates
-          ? `${challenge()}`
+          ? habitCal?.challengeStatus
           : isOngoing
-          ? `${streakTracking()} `
+          ? habitCal?.streakStatus ?? "No streak"
           : null}
       </div>
 
@@ -120,17 +77,17 @@ const HabitCard = ({ habitDetails, deleteHabit, getMyHabits }) => {
       </div>
 
       {/* Date */}
-      <div className="flex space-x-3 text-xs text-[#1c7082]">
-        <span>
-          <b>{hasDates ? "From:" : "Start Date:"}</b>{" "}
-          {formatDate(habitDetails.startDate)}
-        </span>
-        {hasDates && (
+        <div className="flex space-x-3 text-[10px] text-[#1c7082]">
           <span>
-            <b>To:</b> {formatDate(habitDetails.endDate)}
+            <b>{hasDates ? "From:" : "Start Date:"}</b>{" "}
+            {habitCal?.formattedStartDate}
           </span>
-        )}
-      </div>
+          {hasDates && (
+            <span>
+              <b>To:</b> {habitCal?.formattedEndDate}
+            </span>
+          )}
+        </div>
 
       {/* Icons */}
       <div className="flex justify-center items-center w-full space-x-3">

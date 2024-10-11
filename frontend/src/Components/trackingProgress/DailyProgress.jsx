@@ -9,7 +9,6 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { makeAuthenticatedGETRequest } from "../../utils/serverHelpers";
-import PageHeading from "../common/PageHeading";
 import LoadingSpinner from "../common/LoadingSpinner";
 
 const DailyProgressChart = () => {
@@ -47,40 +46,40 @@ const DailyProgressChart = () => {
       year: "numeric",
     }),
     progress: progress.progressPercentage,
-  }));
+  })).reverse();
 
   return (
     <>
     {/* Heading */}
-      <PageHeading title={"Daily Progress"} />
+      <div className="text-md mb-2 text-center text-secondary font-primary font-medium">Daily Progress</div>
 
       {/* chart */}
-      <div className="h-[200px] w-full max-w-screen-lg mx-auto bg-cyan-50">
+      <div className="h-[150px] w-full max-w-screen-lg bg-cyan-50">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={formattedData}>
             {" "}
             <Line
               type="monotone"
               dataKey="progress"
-              stroke="#8bc34a"
+              stroke="#0891B2"
               strokeWidth={2}
-              dot={{ stroke: "#0891B2", strokeWidth: 2, r: 4 }}
+              dot={{ stroke: "#0891B2", strokeWidth: 1, r: 2 }}
             />
             <CartesianGrid stroke="#e0e0e0" strokeDasharray="3 3" />
             <XAxis
               dataKey="date"
-              tick={{ fill: "#9e9e9e", fontSize: 12 }}
+              tick={{ fill: "#9e9e9e", fontSize: 9 }}
               label={{
-                value: "Recent ⟶ Old",
+                value: " ⟶ ",
                 position: "insideBottom",
-                offset: -5,
+                offset: -9,
                 fill: "#0891B2",
-                fontSize: 18,
+                fontSize: 35,
               }} 
             />
             <YAxis
               ticks={[0, 25, 50, 75, 100]}
-              tick={{ fill: "#9e9e9e", fontSize: 14 }}
+              tick={{ fill: "#9e9e9e", fontSize: 9 }}
             />
             <Tooltip
               contentStyle={{
@@ -93,6 +92,7 @@ const DailyProgressChart = () => {
           </LineChart>
         </ResponsiveContainer>
       </div>
+
     </>
   );
 };

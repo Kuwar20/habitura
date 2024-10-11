@@ -187,6 +187,7 @@ const getToken = () => {
     cookie.startsWith(tokenName + "=")
   );
   if (tokenCookie) {
+    // console.log(tokenCookie )
     return tokenCookie.split("=")[1];
   }
   return null;
