@@ -74,13 +74,22 @@ MONGO_URI=your_mongo_uri
 JWT_SECRET=your_jwt_secret
 PORT=your_backend_port
 ```
-## Frontend Keys
+# Frontend Keys
 
-In your frontend code, you need to set up the following environment variables for GitHub and Google authentication:
+In your frontend code, you need to set up the following environment variables for Firebase and GitHub authentication.
+Your `.env` file should look something like this:
 
 ```bash
 REACT_APP_GOOGLE_CLIENT_ID=your_google_client_id
-REACT_APP_GITHUB_CLIENT_ID=your_github_client_id
+REACT_APP_REDIRECT_URI=http://localhost:3000
+
+REACT_APP_FIREBASE_API_KEY=your_firebase_api_key
+REACT_APP_FIREBASE_AUTH_DOMAIN=your_firebase_auth_domain
+REACT_APP_FIREBASE_PROJECT_ID=your_firebase_project_id
+REACT_APP_FIREBASE_STORAGE_BUCKET=your_firebase_storage_bucket
+REACT_APP_FIREBASE_MESSAGING_SENDER_ID=your_firebase_messaging_sender_id
+REACT_APP_FIREBASE_APP_ID=your_firebase_app_id
+REACT_APP_FIREBASE_MEASUREMENT_ID=your_firebase_measurement_id
 ```
 
 ## Run Redis in Docker
