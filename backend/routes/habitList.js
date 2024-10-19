@@ -401,7 +401,6 @@ router.get(
                         },
                         in: {
                           $cond: {
-                            // Handle the first day case
                             if: { $eq: ["$$value.prevDate", null] },
                             then: {
                               currentStreak: 1,
@@ -453,37 +452,30 @@ router.get(
             streakStatus: {
               $cond: {
                 if: {
-                  $or: [
-                    { $eq: [{ $size: { $ifNull: ["$streakDateHistory", []] } }, 0] }, 
-                    { $eq: ["$streakDateHistory", null] },
+                  $and: [
+                    { $gt: ["$streaks.currentStreak", 0] },
+                    { $ne: ["$streaks.currentStreak", null] },
                   ],
                 },
-                then: "🌱 Let's grow!",
-                else: {
+                then: {
                   $cond: {
-                    if: {
-                      $and: [
-                        { $gt: ["$streaks.maxStreak", 0] },
-                        { $ne: ["$streaks.maxStreak", null] },
+                    if: { $eq: ["$streaks.currentStreak", 1] },
+                    then: "🔥 1 Day Streak",
+                    else: {
+                      $concat: [
+                        "🔥 ",
+                        {
+                          $toString: { $ifNull: ["$streaks.currentStreak", 0] },
+                        },
+                        " Days Streak",
                       ],
                     },
-                    then: {
-                      $cond: {
-                        if: { $eq: ["$streaks.maxStreak", 1] },
-                        then: "🔥 1 Day Streak",
-                        else: {
-                          $concat: [
-                            "🔥 ",
-                            { $toString: { $ifNull: ["$streaks.maxStreak", 0] } }, // Handle null
-                            " Days Streak",
-                          ],
-                        },
-                      },
-                    },
-                    else: null,
                   },
                 },
+                else: null,
               },
+              //     },
+              //   },
             },
           },
         },

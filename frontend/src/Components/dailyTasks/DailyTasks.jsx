@@ -1,195 +1,118 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useContext, useEffect, useState } from "react";
 import Card from "./Card";
-import {
-  makeAuthenticatedDELETERequest,
-  makeAuthenticatedPOSTRequest,
-  makeAuthenticatedPUTRequest,
-} from "../../utils/serverHelpers";
-import {
-  addCompletionDateHelper,
-  fetchListHelper,
-  isCheckedHelper,
-  removeCompletionDateHelper,
-} from "../../utils/crudHelpers";
+
 import InputHabit from "../formInputs/InputHabit";
 import { IoMdAdd } from "react-icons/io";
-import { Toast, ToastProvider } from "../common/Toast";
 import PageHeading from "../common/PageHeading";
 import { TiRefreshOutline } from "react-icons/ti";
+import { MdFolderDelete } from "react-icons/md";
 import { throttle } from "../../utils/throttleandDebounce";
+import { HabitContext, TaskContext } from "../../store/store";
+import {
+  DndContext,
+  closestCorners,
+  useSensor,
+  useSensors,
+  MouseSensor,
+  TouchSensor,
+  KeyboardSensor,
+} from "@dnd-kit/core";
+import {
+  sortableKeyboardCoordinates,
+  SortableContext,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
 
 const DailyTasks = () => {
-  const [listOfHabits, setListOfHabits] = useState([]);
-  const [listOfTasks, setListOfTasks] = useState([]);
-  const [task, setTask] = useState("");
-  const [key, setKey] = useState("");
-  const [showMenu, setShowMenu] = useState(true);
-  const [isUpdating, setIsUpdating] = useState(false);
-  const [updateTaskId, setUpdateTaskId] = useState("");
-  const inputRef = useRef(null);
-  const [refreshHabits, setRefreshHabits] = useState(false)
+  // Task Api's
+  const {
+    addTask,
+    getTasklist,
+    handleKeyDown,
+    updateTask,
+    handleUpdateClick,
+    deleteTask,
+    delAllTasks,
+    taskCompletionDate,
+    taskUncompleted,
+    isTaskChecked,
+    handleChange,
+    inputRef,
+    task,
+    isUpdating,
+    updateTaskId,
+    listOfTasks = [],
+    setListOfTasks,
+  } = useContext(TaskContext);
 
-  const handleChange = (e) => setTask(e.target.value);
+  // Habit Api's
+  const {
+    listOfHabits,
+    showMenu,
+    getMyHabits,
+    habitCompleted,
+    habitUncompleted,
+    isHabitChecked,
+    uncheckAllHabits,
+  } = useContext(HabitContext);
 
-  // shift focus when updating task
-  const handleFocus = () => {
-    if (inputRef.current) {
-      inputRef.current.focus();
-    }
-  };
-
-  // ********************************** HABIT APIS **************************
-  // Get User Habits Array
-  const getMyHabits = async () => {
-    await fetchListHelper("/habit/getHabitslist", setListOfHabits);
-  };
-
-  // Add Completion Dates
-  const habitCompleted = async (id) => {
-    await addCompletionDateHelper("/habit/completionHabit", id);
-  };
-
-  // remove Completion Dates
-  const habitUncompleted = async (id) => {
-    await removeCompletionDateHelper("/habit/removeCompletionDate", id);
-  };
-
-  // is habit checked
-  const isHabitChecked = async (id, isChecked) => {
-    await isCheckedHelper("/habit/statusUpdate", id, isChecked);
-  };
-
-  // uncheck on refresh
-  const uncheckAllHabits = async () => {
-    try {
-      await makeAuthenticatedPOSTRequest("/habit/uncheckAll");
-    // const res =  await fetchListHelper("/habit/getHabitslist", setListOfHabits);
-      // console.log(res);
-      // console.log(listOfHabits);
-      // console.log(setListOfHabits)
-      // setListOfHabits((prevHabits) =>
-      //   prevHabits.map((habit) => ({
-      //     ...habit,
-      //     isCompleted: false,
-      //   }))
-      // );
-    } catch (error) {
-      console.error("Error unchecking all habits:", error);
-    }
-  };
-  
-
-  // ************************************ TASKS APIS ***************************
-  // Create Tasks
-  const addTask = async () => {
-    if (!task) {
-      console.error("Task cannot be empty");
-      Toast.error("Empty task cannot be added!");
+  // Draagable div
+  const handleDragEnd = (event) => {
+    const { active, over } = event;
+    // Check if 'over' is null before accessing its properties
+    if (!over) {
+      // console.log("Dropped outside of any valid target.");
       return;
     }
-
-    try {
-      const response = await makeAuthenticatedPOSTRequest("/task/addTask", {
-        task: task,
-      });
-      setKey("");
-      setTask("");
-
-      // console.log("Task added successfully", response);
-      Toast.success("Task added successfully.");
-      await getTasklist();
-    } catch (error) {
-      console.error("Error adding task", error);
-    }
-  };
-
-  // add tasks on key down - Enter
-  const handleKeyDown = (e) => {
-    setKey(e.key);
-    if (e.key === "Enter") {
-      if (isUpdating) {
-        handleUpdateClick(updateTaskId, task);
-      } else {
-        addTask();
+    if (active.id !== over.id) {
+      const oldIndex = listOfTasks.findIndex((task) => task._id === active.id);
+      const newIndex = listOfTasks.findIndex((task) => task._id === over.id);
+      // Check if both indices are valid
+      if (oldIndex === -1 || newIndex === -1) {
+        // console.log("One of the task IDs was not found.");
+        return;
       }
+
+      const updatedTasks = arrayMove(listOfTasks, oldIndex, newIndex);
+      setListOfTasks(updatedTasks);
     }
   };
 
-  // GET all tasks
-  const getTasklist = async () => {
-    await fetchListHelper("/task/getAllTasks", setListOfTasks);
+  const arrayMove = (array, from, to) => {
+    const newArray = [...array];
+    const [movedItem] = newArray.splice(from, 1);
+    newArray.splice(to, 0, movedItem);
+    return newArray;
   };
 
-  // Delete Task
-  const deleteTask = async (id) => {
-    try {
-      const response = await makeAuthenticatedDELETERequest(
-        `/task/deleteTask/${id}`
-      );
-      Toast.success("Task deleted successfully.");
-      // console.log(response);
-      await getTasklist();
-    } catch (error) {
-      console.error("Error deleting task:", error);
-      // error && Toast.error("Failed to delete task");
-    }
-  };
-
-  // Update task - call fn when update btn clicked
-  const updateTask = async (taskId, task) => {
-    handleFocus();
-    setIsUpdating(true);
-    setTask(task); // task to update
-    setUpdateTaskId(taskId);
-  };
-
-  // call fn - when update btn clicked
-  const handleUpdateClick = async (taskId, task) => {
-    try {
-      const response = await makeAuthenticatedPUTRequest(
-        `/task/updateTask/${taskId}`,
-        { task: task }
-      );
-      // console.log(response);
-      setIsUpdating(false);
-      setTask("");
-      setKey("");
-      setUpdateTaskId(null);
-      Toast.success("Task updated successfully.");
-      await getTasklist();
-    } catch (error) {
-      console.error("Error updating task:", error);
-      Toast.error("Failed to update task.");
-    }
-  };
-
-  // task Completed
-  const taskCompletionDate = async (id) => {
-    await addCompletionDateHelper("/task/completionTask", id);
-  };
-
-  // task Uncompleted
-  const taskUncompleted = async (id) => {
-    await removeCompletionDateHelper("/task/removeCompletionDate", id);
-  };
-
-  // is task checked
-  const isTaskChecked = async (id, isChecked) => {
-    await isCheckedHelper("/task/statusUpdate", id, isChecked);
-  };
+  const sensors = useSensors(
+    useSensor(MouseSensor, {
+      activationConstraint: {
+        distance: 10,
+      },
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: 250,
+        tolerance: 10,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   // Throttled Get Tasks and Habits
-  const throttledGetMyTasks = useCallback(throttle(getTasklist, 100000, []))
-  const throttledGetMyHabits = useCallback(throttle(getMyHabits, 100000, []))
+  const throttledGetMyTasks = useCallback(throttle(getTasklist, 100000, []));
+  const throttledGetMyHabits = useCallback(throttle(getMyHabits, 100000, []));
 
-  useEffect(()=>{
+  useEffect(() => {
     throttledGetMyHabits();
     throttledGetMyTasks();
-  },[])
+  }, []);
 
   return (
-    <div className="">
-      <ToastProvider />
+    <div>
       {/* head */}
       <PageHeading title={" Today's Tasks"} />
 
@@ -225,6 +148,7 @@ const DailyTasks = () => {
             My Habits
           </p>
           <TiRefreshOutline
+            title="Refresh habits"
             className="text-3xl text-coolsecondary hover:text-secondary cursor-pointer mb-2"
             onClick={uncheckAllHabits}
           />
@@ -247,23 +171,39 @@ const DailyTasks = () => {
           <p className="text-[10px] text-right font-medium text-secondary w-fit bg-cyan-100 rounded-sm p-1 my-2 ">
             Today's Tasks
           </p>
-          {/* <TiRefreshOutline className="text-3xl text-coolsecondary hover:text-secondary cursor-pointer mb-2" /> */}
-        </div>
-        {listOfTasks.map((task, index) => (
-          <Card
-            key={index}
-            taskId={task._id}
-            task={task.task}
-            cardClass={"bg-cyan-100"}
-            showMenu={showMenu}
-            deleteTask={deleteTask}
-            updateTask={updateTask}
-            addCompletionDate={taskCompletionDate}
-            removeCompletionDate={taskUncompleted}
-            isChecked={task.isCompleted}
-            isTickMarked={isTaskChecked}
+          <MdFolderDelete
+            title="Delete all tasks"
+            className="text-3xl text-coolsecondary hover:text-secondary cursor-pointer mb-2"
+            onClick={delAllTasks}
           />
-        ))}
+        </div>
+
+        <DndContext
+          collisionDetection={closestCorners}
+          onDragEnd={handleDragEnd}
+          sensors={sensors}
+        >
+          <SortableContext
+            items={listOfTasks}
+            strategy={verticalListSortingStrategy}
+          >
+            {listOfTasks.map((task, index) => (
+              <Card
+                key={index}
+                taskId={task._id}
+                task={task.task}
+                cardClass={"bg-cyan-100"}
+                showMenu={showMenu}
+                deleteTask={deleteTask}
+                updateTask={updateTask}
+                addCompletionDate={taskCompletionDate}
+                removeCompletionDate={taskUncompleted}
+                isChecked={task.isCompleted}
+                isTickMarked={isTaskChecked}
+              />
+            ))}
+          </SortableContext>
+        </DndContext>
       </div>
     </div>
   );

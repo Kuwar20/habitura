@@ -10,25 +10,50 @@ import {
 } from "recharts";
 import { makeAuthenticatedGETRequest } from "../../utils/serverHelpers";
 import LoadingSpinner from "../common/LoadingSpinner";
+import io from "socket.io-client"; // Import Socket.IO client
+
 
 const DailyProgressChart = () => {
   const [progressData, setProgressData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [userId, setUserId] = useState("")
 
   const fetchProgress = async () => {
     try {
       const response = await makeAuthenticatedGETRequest("/track/dailyTasks");
       setProgressData(response.allProgress);
+      setUserId(response.user._id)
     } catch (error) {
       console.error("Error fetching daily progress:", error);
     } finally {
       setLoading(false);
     }
-  };
+  }
 
   useEffect(() => {
-    fetchProgress();
-  }, [progressData]);
+    fetchProgress(); // Fetch the progress data on component mount
+  }, []); // This effect runs only once when the component mounts
+
+  useEffect(() => {
+    if (!userId) return; // If userId is not set, don't run the socket connection
+
+    const socket = io("http://localhost:5000"); // Replace with your server URL
+
+    // After fetching the userId, join the user's room
+    socket.emit("joinRoom", userId);
+
+    // Listen for progress updates from the server
+    socket.on("progressUpdate", (data) => {
+      setProgressData(data);
+      setLoading(false);
+    });
+
+    // Cleanup on component unmount
+    return () => {
+      socket.disconnect();
+    };
+  }, [userId]); // Run this effect only when `userId` is set
+  
 
   if (loading) {
     return <LoadingSpinner />;

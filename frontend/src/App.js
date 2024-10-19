@@ -22,6 +22,7 @@ import MyHabits from "./Pages/routes/MyHabits";
 import PrivateRoute from "./Components/privateRoute/PrivateRoute";
 import HabitInfo from "./Components/Habit/HabitInfo";
 import MyProfile from "./Pages/routes/MyProfile";
+import Settings from "./Pages/routes/Settings";
 
 const App = () => {
 
@@ -89,6 +90,10 @@ const App = () => {
         <Route
           path="/my-profile"
           element={<PrivateRoute element={<MyProfile />} />}
+        />
+        <Route
+          path="/settings"
+          element={<PrivateRoute element={<Settings />} />}
         />
       </Routes>
       <Footer />

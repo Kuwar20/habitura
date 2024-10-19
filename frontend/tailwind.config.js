@@ -1,45 +1,40 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  purge: {
-    content: ['./src/**/*.html', './src/**/*.js', './src/**/*.jsx'], // Update with the paths to your components
-    options: {
-      safelist: [
-        'bg-green-100',
-        'bg-red-100', // Add any other colors used dynamically here
-        // other classes you want to protect from being purged
-      ],
-    },
-  },
+  content: ["./src/**/*.html", "./src/**/*.js", "./src/**/*.jsx"], // Specify the paths to your source files
   theme: {
     extend: {
       colors: {
         primary: "#e9dfdf",
         secondary: "#556e6e",
         coolsecondary: "#829c9c",
-        darkgreen: '#183939',
-        paragraph: '#4b5563',
-        lightgreen: '#d4e7af',
-        darkestgreen: '#0b2728',
-        habit:'#1e4d5b'
+        darkgreen: "#183939",
+        paragraph: "#4b5563",
+        lightgreen: "#d4e7af",
+        darkestgreen: "#0b2728",
+        habit: "#1e4d5b",
       },
       spacing: {
         container: "10rem",
-        pagePadding: "1.25rem"
+        pagePadding: "1.25rem",
       },
       fontFamily: {
         primary: ["Roboto", "sans-serif"],
-        logo: ["Alex Brush", 'cursive'],
-        handwritten:["Playpen Sans", 'cursive']
+        logo: ["Alex Brush", "cursive"],
+        handwritten: ["Playpen Sans", "cursive"],
       },
-      opacity:{
-        opacityPrimary:"0.5"
-      }
-      // backgroundImage:{
-      //   signupBg: 'url("/assets/jason-strull-kqBzDbiVV40-unsplash.jpg")'
-      // }
+      opacity: {
+        opacityPrimary: "0.5",
+      },
+    },
+    screens: {
+      xs: "320px",
+
+      sm: "640px",
+      md: "768px",
+      lg: "1024px",
+      xl: "1280px",
+      '2xl':	'1536px'
     },
   },
-  plugins: [
-    require('tailwind-scrollbar'),
-  ],
+  plugins: [require("tailwind-scrollbar")],
 };

@@ -113,12 +113,12 @@ const MyProfile = () => {
   }, []);
 
   return (
-    <div className="h-screen flex">
+    <div className="lg:h-screen flex flex-col md:flex-row">
       <ToastProvider />
       <Sidebar />
       <div className="p-pagePadding bg-primary bg-opacity-opacityPrimary w-full h-full flex flex-col justify-center items-center">
         <PageHeading title={"My Profile"} className={"text-left w-full"} />
-        <div className="bg-white shadow-md rounded-md p-pagePadding h-full w-2/3">
+        <div className=" rounded-md p-pagePadding h-full w-full md:w-2/3">
           {/* Profile Picture */}
           <div className="relative flex flex-col items-center">
             <img

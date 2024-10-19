@@ -6,12 +6,16 @@ import reportWebVitals from "./reportWebVitals";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { BrowserRouter as Router } from "react-router-dom";
 
+// Ensure that the environment variables are defined
+const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
+const redirectUri = process.env.REACT_APP_REDIRECT_URI;
+
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>
     <GoogleOAuthProvider
-      clientId="995654821445-e23ei3n6q8a5cfj47nujd20g8b5ii2f6.apps.googleusercontent.com"
-      redirectUri="http://localhost:3000"
+      clientId={clientId}
+      redirectUri={redirectUri}
     >
       <Router>
         <App />

@@ -16,7 +16,7 @@ router.get(
         { $match: { _id: user._id } },
         {
           $lookup: {
-            from: "habits", 
+            from: "habits",
             localField: "habitList",
             foreignField: "_id",
             as: "habits",
@@ -24,7 +24,7 @@ router.get(
         },
         {
           $lookup: {
-            from: "tasks", 
+            from: "tasks",
             localField: "taskList",
             foreignField: "_id",
             as: "tasks",
@@ -60,11 +60,14 @@ router.get(
         return res.status(404).json({ message: "User not found" });
       }
 
-      const { totalHabits, totalTasks, completedHabits, completedTasks } = userWithProgress[0];
+      const { totalHabits, totalTasks, completedHabits, completedTasks } =
+        userWithProgress[0];
       const totalDailyTasks = totalHabits + totalTasks;
 
       if (totalDailyTasks === 0) {
-        return res.status(200).json({ message: "No tasks or habits found for today" });
+        return res
+          .status(200)
+          .json({ message: "No tasks or habits found for today" });
       }
 
       // Calculate progress
@@ -99,9 +102,13 @@ router.get(
         date: -1,
       });
 
+      // Emit progress update to the client via WebSocket using the globally set io
+      const io = req.app.get("io");
+      io.to(user._id.toString()).emit("progressUpdate", allProgress);
+
       return res.status(200).json({
         message: "All Progress Data:",
-        allProgress,
+        allProgress,user
       });
     } catch (error) {
       console.error(error);

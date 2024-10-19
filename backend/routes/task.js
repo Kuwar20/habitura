@@ -104,6 +104,37 @@ router.delete(
   }
 );
 
+// Delete all tasks
+router.delete(
+  "/deleteAllTasks",
+  passport.authenticate("jwt", { session: false }),
+  async (req, res) => {
+    try {
+      const user = req.user;
+
+      if (user.taskList.length === 0) {
+        return res.status(200).json({ message: "No tasks to delete" });
+      }
+
+      // Update user's task list to an empty array
+      const userUpdate = User.findByIdAndUpdate(user._id, { $set: { taskList: [] } });
+
+      // Clear the cache for the user's tasks
+      const clearCache = redis.del(`tasks:${user._id}`);
+
+      // Execute both tasks in parallel
+      await Promise.all([userUpdate, clearCache]);
+
+      res.status(200).json({ message: "All tasks deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting tasks:", error);
+      res.status(500).json({ error: error.message });
+    }
+  }
+);
+
+
+
 // Update Task
 router.put(
   "/updateTask/:id",

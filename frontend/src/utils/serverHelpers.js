@@ -179,7 +179,7 @@ export const makeAuthenticatedPOSTFileRequest = async (route, formData) => {
 };
 
 // get token
-const getToken = () => {
+export const getToken = () => {
   const tokenName = "token";
   // Retrieves all cookies from the document.cookie string and splits them into an array of individual cookie strings.
   const cookies = document.cookie.split("; ");

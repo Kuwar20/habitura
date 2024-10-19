@@ -44,13 +44,13 @@ const HabitCard = ({ habitDetails, deleteHabit, getMyHabits }) => {
     if (habitDetails && habitDetails._id) {
       getHabitWithCalculations();
     }
-  }, 300), // Adjust the debounce delay as necessary
-  [habitDetails] // Dependencies for the fetch
+  }, 300),
+  [habitDetails] 
 );
 
 useEffect(() => {
   console.log("Re-render on keydown");
-  debouncedFetchHabit(); // Call the debounced fetch function
+  debouncedFetchHabit();
 }, [habitDetails]);
 
   // Log habitCalculation when it updates
@@ -67,7 +67,7 @@ useEffect(() => {
         {hasDates
           ? habitCal?.challengeStatus
           : isOngoing
-          ? habitCal?.streakStatus ?? "No streak"
+          ? habitCal?.streakStatus ?? "No Streak"
           : null}
       </div>
 

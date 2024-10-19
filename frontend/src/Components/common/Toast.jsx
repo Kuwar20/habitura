@@ -18,14 +18,14 @@ const Toast = {
   },
   info: (message, options = {}) => {
     toast.info(message, {
-      className: '!bg-coolsecondary !bg-opacity-20  p-4 rounded-md shadow-lg',
+      className: '!bg-blue-400 !bg-opacity-20  p-4 rounded-md shadow-lg',
       bodyClassName: 'text-sm font-bold',
       ...options,
     });
   },
   warning: (message, options = {}) => {
     toast.warning(message, {
-      className: 'bg-yellow-500 !bg-opacity-20  p-4 rounded-md shadow-lg',
+      className: '!bg-yellow-200 !bg-opacity-20  p-4 rounded-md shadow-lg',
       bodyClassName: 'text-sm font-bold',
       ...options,
     });

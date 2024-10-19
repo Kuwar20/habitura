@@ -54,7 +54,7 @@ const HabitInfo = () => {
           <TiArrowBack className="text-3xl text-cyan-800  hover:scale-105 transition-all duration-300" />
         </div>
       </Link>
-      <div className="h-full grid grid-cols-2">
+      <div className="h-full grid md:grid-cols-2">
         <div>
           {/* Habit title */}
           <h2 className="text-2xl text-cyan-900 my-4 font-medium flex items-center">

@@ -9,13 +9,13 @@ import { getAuth, GithubAuthProvider } from "firebase/auth";
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: "AIzaSyCEqcu3CsBQq3AZQfstAla49m6wn_XnLvM",
-  authDomain: "habitura-d174c.firebaseapp.com",
-  projectId: "habitura-d174c",
-  storageBucket: "habitura-d174c.appspot.com",
-  messagingSenderId: "282229381031",
-  appId: "1:282229381031:web:0fdbffc6b544a1f67f4882",
-  measurementId: "G-TF65LT3Y9R"
+  apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
+  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.REACT_APP_FIREBASE_APP_ID,
+  measurementId: process.env.REACT_APP_FIREBASE_MEASUREMENT_ID,
 };
 
 // Initialize Firebase

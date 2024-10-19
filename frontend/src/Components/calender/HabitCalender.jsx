@@ -28,7 +28,7 @@ const HabitCalendar = ({ completionDates }) => {
   };
 
   return (
-    <div className="p-6 bg-[#b9e1cb] bg-opacity-40 rounded-lg shadow-lg h-3/4 w-full">
+    <div className="p-6 bg-[#b9e1cb] bg-opacity-40 rounded-lg shadow-lg h-full md:h-3/4 w-full">
       <Calendar
         localizer={localizer}
         events={events}

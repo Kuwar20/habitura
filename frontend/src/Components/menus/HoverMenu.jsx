@@ -11,7 +11,7 @@ const HoverMenu = ({ items }) => (
           <div
             onClick={(e) => {
               e.preventDefault();
-              item.onClick && item.onClick(); 
+              item.onClick && item.onClick(e); 
             }}
             className="font-primary font-medium px-3"
           >
