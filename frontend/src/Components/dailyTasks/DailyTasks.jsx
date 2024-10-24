@@ -22,6 +22,7 @@ import {
   SortableContext,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
+import { makeAuthenticatedPUTRequest } from "../../utils/serverHelpers";
 
 const DailyTasks = () => {
   // Task Api's
@@ -57,7 +58,7 @@ const DailyTasks = () => {
   } = useContext(HabitContext);
 
   // Draagable div
-  const handleDragEnd = (event) => {
+  const handleDragEnd = async(event) => {
     const { active, over } = event;
     // Check if 'over' is null before accessing its properties
     if (!over) {
@@ -75,6 +76,12 @@ const DailyTasks = () => {
 
       const updatedTasks = arrayMove(listOfTasks, oldIndex, newIndex);
       setListOfTasks(updatedTasks);
+      const taskOrder = updatedTasks.map(task=>task._id)
+      console.log(oldIndex, newIndex)
+
+      const response = await makeAuthenticatedPUTRequest('/task/order',{taskOrder});
+      console.log(response)
+      getTasklist();
     }
   };
 
@@ -103,8 +110,8 @@ const DailyTasks = () => {
   );
 
   // Throttled Get Tasks and Habits
-  const throttledGetMyTasks = useCallback(throttle(getTasklist, 100000, []));
-  const throttledGetMyHabits = useCallback(throttle(getMyHabits, 100000, []));
+  const throttledGetMyTasks = useCallback(throttle(getTasklist, 10000, []));
+  const throttledGetMyHabits = useCallback(throttle(getMyHabits, 10000, []));
 
   useEffect(() => {
     throttledGetMyHabits();

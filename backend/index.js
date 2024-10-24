@@ -1,6 +1,8 @@
 const express = require("express");
 // const morgan = require('morgan');
 // const helmet = require('helmet');
+// const socketIo = require('socket.io'); // Ensure this line is present
+
 const { createServer } = require("http"); // Import createServer
 const { Server } = require("socket.io"); // Import Socket.IO
 const cors = require("cors");
@@ -29,7 +31,8 @@ const io = new Server(server, {
     credentials: true,
   },
 });
-// Attach io to app (making it globally accessible)
+
+// // Attach io to app (making it globally accessible)
 app.set("io", io);
 
 // Middleware to parse JSON bodies
@@ -72,25 +75,14 @@ server.listen(port, () => {
   console.log("Server is Listening at port ", port);
 });
 
-io.on("connection", (socket) => {
-  console.log("A client connected");
-  // Handle user joining a room
-  socket.on("joinRoom", (userId) => {
-    socket.join(userId);
-    console.log(`User with ID ${userId} joined their room`);
+io.on("connect", (socket) => {
+  console.log("New client connected with id server:", socket.id);
+    // Test emitting a message
+    socket.emit("testEvent", { message: "Hello from the server" });
+    console.log("testEvent emitted to client:", socket.id); // <-- Add this log
 
-    // Optionally emit initial progress data
-    // const initialProgress = getProgressForUser(userId); // You can use your actual DB call here
-    // socket.emit("progressUpdate", initialProgress);
-  });
-
-  // Handle disconnection
   socket.on("disconnect", () => {
-    console.log("Client disconnected");
+    console.log("Client disconnected server:", socket.id);
   });
 });
 
-// function getProgressForUser(userId) {
-//   // Dummy progress data; replace this with your DB call to fetch actual progress
-//   return [{ date: new Date(), progressPercentage: Math.random() * 100 }];
-// }

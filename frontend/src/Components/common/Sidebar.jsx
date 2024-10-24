@@ -4,14 +4,14 @@ import { useCookies } from "react-cookie";
 import { FaBars, FaTimes } from "react-icons/fa"; 
 
 const Sidebar = () => {
-  const [removeCookie] = useCookies(["token"]);
+  const [ removeCookie] = useCookies(["token"]);
   const [isSidebarOpen, setSidebarOpen] = useState(false); 
 
   const logout = () => {
     const confirm = window.confirm("Are you sure you want to logout?");
     if (confirm) {
       removeCookie("token", { path: "/" });
-      window.location.href = "/"; 
+      // window.location.href = "/"; 
     } else {
       return;
     }
@@ -33,7 +33,7 @@ const Sidebar = () => {
 
       {/* Sidebar */}
       <div
-        className={`h-screen w-64 bg-darkgreen text-white flex flex-col z-50 transition-transform duration-300 ${
+        className={`h-full mt-12 lg:mt-0 w-64 bg-darkgreen text-white flex flex-col fixed lg:static z-50 transition-transform duration-300 ${
           isSidebarOpen ? "translate-x-0" : "-translate-x-full"
         } lg:translate-x-0`}
       >
@@ -101,10 +101,10 @@ const Sidebar = () => {
         </nav>
       </div>
 
-      {/* Overlay to close the sidebar when clicking outside (optional) */}
+      {/* Overlay to close the sidebar when clicking outside*/}
       {isSidebarOpen && (
         <div
-          className=" inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
           onClick={toggleSidebar}
         ></div>
       )}

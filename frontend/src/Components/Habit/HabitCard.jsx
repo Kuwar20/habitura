@@ -101,7 +101,7 @@ useEffect(() => {
           title="Update"
           onClick={handleUpdate}
         />
-        <Link to={`/habitInfo/${habitDetails._id}`}>
+        <Link to={`/habitInfo/${habitDetails._id}` }  state={{ habitCal }}>
           <BsInfoLg
             className="text-xl text-[#1c7082] cursor-pointer transition-transform duration-300 transform hover:text-yellow-500 hover:scale-110"
             title="Know More"

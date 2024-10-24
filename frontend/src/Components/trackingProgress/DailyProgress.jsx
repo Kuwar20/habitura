@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   LineChart,
   Line,
@@ -10,50 +10,83 @@ import {
 } from "recharts";
 import { makeAuthenticatedGETRequest } from "../../utils/serverHelpers";
 import LoadingSpinner from "../common/LoadingSpinner";
-import io from "socket.io-client"; // Import Socket.IO client
-
+import { socket } from "../../socket";
 
 const DailyProgressChart = () => {
   const [progressData, setProgressData] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [userId, setUserId] = useState("")
+  const [userId, setUserId] = useState("");
 
   const fetchProgress = async () => {
     try {
       const response = await makeAuthenticatedGETRequest("/track/dailyTasks");
       setProgressData(response.allProgress);
-      setUserId(response.user._id)
+      setUserId(response.user._id);
     } catch (error) {
       console.error("Error fetching daily progress:", error);
     } finally {
       setLoading(false);
     }
-  }
+  };
 
+  // // Live update progress data
   useEffect(() => {
-    fetchProgress(); // Fetch the progress data on component mount
-  }, []); // This effect runs only once when the component mounts
-
-  useEffect(() => {
-    if (!userId) return; // If userId is not set, don't run the socket connection
-
-    const socket = io("http://localhost:5000"); // Replace with your server URL
-
-    // After fetching the userId, join the user's room
-    socket.emit("joinRoom", userId);
-
+    fetchProgress(); // Initial fetch
+    socket.connect();
+    console.log("Connected to the frontend");
     // Listen for progress updates from the server
     socket.on("progressUpdate", (data) => {
-      setProgressData(data);
-      setLoading(false);
+      if (data.userId === userId) {
+        console.log(data.userId, data.allProgress, "hhhhhhh");
+        setProgressData((prevData) => [...prevData, data.allProgress]);
+      }
     });
-
-    // Cleanup on component unmount
     return () => {
+      socket.off("progressUpdate")
       socket.disconnect();
     };
-  }, [userId]); // Run this effect only when `userId` is set
+  }, [userId]);
+
+  socket.on('connect_error', (err) => {
+    console.error('Connection error:', err);
+  });
   
+
+  // test socket io
+  useEffect(() => {
+    console.log("Connecting to socket...");
+    socket.connect(); 
+
+    socket.on("connect", () => {
+      console.log("Connected to the server");
+    });
+
+    socket.on("connect_error", (err) => {
+      console.log("Connection error:", err); 
+    });
+
+    socket.on("testEvent", (data) => {
+      console.log("Received test event:", data);
+    });
+
+    return () => {
+      socket.off("connect");
+      socket.off("testEvent");
+      socket.disconnect();
+    };
+  }, []);
+
+  // Formatted data
+  const formattedData = progressData
+    .map((progress) => ({
+      date: new Date(progress.date).toLocaleDateString("default", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      }),
+      progress: progress.progressPercentage,
+    }))
+    .reverse();
 
   if (loading) {
     return <LoadingSpinner />;
@@ -63,20 +96,12 @@ const DailyProgressChart = () => {
     return <div>No progress data available</div>;
   }
 
-  // Format the data for the chart
-  const formattedData = progressData.map((progress) => ({
-    date: new Date(progress.date).toLocaleDateString("default", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    }),
-    progress: progress.progressPercentage,
-  })).reverse();
-
   return (
     <>
-    {/* Heading */}
-      <div className="text-md mb-2 text-center text-secondary font-primary font-medium">Daily Progress</div>
+      {/* Heading */}
+      <div className="text-md mb-2 text-center text-secondary font-primary font-medium">
+        Daily Progress
+      </div>
 
       {/* chart */}
       <div className="h-[150px] w-full max-w-screen-lg bg-cyan-50">
@@ -100,7 +125,7 @@ const DailyProgressChart = () => {
                 offset: -9,
                 fill: "#0891B2",
                 fontSize: 35,
-              }} 
+              }}
             />
             <YAxis
               ticks={[0, 25, 50, 75, 100]}
@@ -117,7 +142,6 @@ const DailyProgressChart = () => {
           </LineChart>
         </ResponsiveContainer>
       </div>
-
     </>
   );
 };

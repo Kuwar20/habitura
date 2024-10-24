@@ -53,7 +53,7 @@ const Card = ({
       label: "Update",
       icon: <UploadOutlined />,
       onClick: (e) => {
-        e.stopPropagation();
+        // e.stopPropagation();
         // console.log("Upload clicked");
         updateTask(taskId, task);
       },
@@ -63,7 +63,7 @@ const Card = ({
       label: "Delete",
       icon: <DeleteOutlined />,
       onClick: (e) => {
-        e.stopPropagation();
+        // e.stopPropagation();
         deleteTask(taskId);
       },
       danger: true,

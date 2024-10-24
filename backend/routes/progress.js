@@ -102,13 +102,14 @@ router.get(
         date: -1,
       });
 
-      // Emit progress update to the client via WebSocket using the globally set io
       const io = req.app.get("io");
-      io.to(user._id.toString()).emit("progressUpdate", allProgress);
+      console.log("Emitting progressUpdate event for user:", user._id);
+      io.emit("progressUpdate", { userId: user._id, allProgress });
 
       return res.status(200).json({
         message: "All Progress Data:",
-        allProgress,user
+        allProgress,
+        user,
       });
     } catch (error) {
       console.error(error);

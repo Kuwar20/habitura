@@ -6,9 +6,9 @@ import PageHeading from "../../Components/common/PageHeading";
 const MyHabits = () => {
   
   return (
-      <div className="lg:h-screen flex flex-col md:flex-row">
+      <div className="h-screen flex flex-col lg:flex-row">
         <Sidebar />
-        <div className="p-pagePadding w-full bg-primary bg-opacity-opacityPrimary overflow-y-scroll custom-scrollbar">
+        <div className="p-pagePadding w-full h-full bg-primary bg-opacity-opacityPrimary overflow-y-scroll custom-scrollbar">
           <PageHeading title={"My Habits"} titleClass={"text-habit"}/>
 
           {/* habits */}
