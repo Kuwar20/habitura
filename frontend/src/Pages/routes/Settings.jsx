@@ -12,7 +12,7 @@ const Settings = () => {
   const [searchVisibility, setSearchVisibility] = useState(false);
 
   return (
-    <div className="lg:h-screen flex flex-col md:flex-row">
+    <div className="lg:h-screen flex flex-col lg:flex-row">
       <Sidebar />
       <div className="p-pagePadding bg-primary bg-opacity-opacityPrimary w-full h-full flex flex-col">
         <PageHeading title={"Settings"} />

@@ -62,14 +62,18 @@ router.get(
         return res.status(404).json({ message: "User Not Found." });
       }
 
+      // Sort tasks by order after they are populated
+      const sortedTasks = getUser.taskList.sort((a, b) => a.order - b.order);
+
       await redis.set(
         `tasks:${user._id}`,
-        JSON.stringify(getUser.taskList),
+        JSON.stringify(sortedTasks),
         "EX",
         3600
       );
+
       // console.log("Returning tasks from database");
-      return res.status(200).json(getUser.taskList);
+      return res.status(200).json(sortedTasks);
     } catch (error) {
       console.error("Error fetching tasks:", error);
       res.status(500).json({ error: error.message });
@@ -117,7 +121,9 @@ router.delete(
       }
 
       // Update user's task list to an empty array
-      const userUpdate = User.findByIdAndUpdate(user._id, { $set: { taskList: [] } });
+      const userUpdate = User.findByIdAndUpdate(user._id, {
+        $set: { taskList: [] },
+      });
 
       // Clear the cache for the user's tasks
       const clearCache = redis.del(`tasks:${user._id}`);
@@ -132,8 +138,6 @@ router.delete(
     }
   }
 );
-
-
 
 // Update Task
 router.put(
@@ -261,6 +265,37 @@ router.post(
     } catch (error) {
       console.error("Error changing status of task", error);
       return res.status(500).json({ message: "Error changing status of task" });
+    }
+  }
+);
+
+// Update task order based on their new indices
+router.put(
+  "/order",
+  passport.authenticate("jwt", { session: false }),
+  async (req, res) => {
+    const { taskOrder } = req.body;
+    const user = req.user;
+
+    try {
+      // Loop through each task and update the order field in MongoDB
+      for (let i = 0; i < taskOrder.length; i++) {
+        const taskId = taskOrder[i];
+
+        await Task.findOneAndUpdate(
+          { _id: taskId, user: user._id },
+          { order: i },
+          { new: true }
+        );
+      }
+      // Clear the user's tasks cache after updating order
+      await redis.del(`tasks:${user._id}`);
+      return res
+        .status(200)
+        .json({ message: "Task order updated successfully" });
+    } catch (error) {
+      console.error("Error updating task order:", error);
+      res.status(500).json({ error: "Failed to update task order" });
     }
   }
 );

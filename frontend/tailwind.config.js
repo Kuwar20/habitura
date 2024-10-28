@@ -16,6 +16,7 @@ module.exports = {
       spacing: {
         container: "10rem",
         pagePadding: "1.25rem",
+        homepagePadding:"4rem"
       },
       fontFamily: {
         primary: ["Roboto", "sans-serif"],
@@ -32,6 +33,7 @@ module.exports = {
       sm: "640px",
       md: "768px",
       lg: "1024px",
+      'max-lg':'1170px',
       xl: "1280px",
       '2xl':	'1536px'
     },

@@ -9,7 +9,7 @@ const DailyTasks = lazy(()=>import ("../../Components/dailyTasks/DailyTasks"));
 
 const Dashboard = () => {
   return (
-    <div className="lg:h-screen flex flex-col md:flex-row">
+    <div className="lg:h-screen flex flex-col lg:flex-row">
       <Sidebar />
 
       <div className=" w-full grid grid-cols-1 md:grid-cols-2 gap-3 max-h-full bg-primary bg-opacity-50 p-pagePadding">
@@ -32,7 +32,7 @@ const Dashboard = () => {
           </div>
 
           {/* My notes */}
-          <div className="row-span-2 max-h-full rounded-md shadow-md ">
+          <div className="row-span-2 max-h-full rounded-md shadow-md z-0">
             <MyNote />
           </div>
         </div>

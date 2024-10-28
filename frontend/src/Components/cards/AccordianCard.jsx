@@ -8,7 +8,7 @@ const AccordianCard = ({ visibleText, hiddenText }) => {
     setShow(!show);
   };
   return (
-    <div className="rounded-full border border-gray-400 m-1 mx-72 font-primary p-4 cursor-pointer">
+    <div className="rounded-full border border-gray-400 m-1 font-primary p-4 cursor-pointer">
     {/* visible content */}
     <div className="flex justify-between items-center mx-3" onClick={toggle}>
       <div className="text-paragraph text-xl font-semibold font-primary">

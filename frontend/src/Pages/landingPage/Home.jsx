@@ -23,7 +23,7 @@ const Home = () => {
         Your browser does not support the video tag.
       </video>
 
-      <div className="flex justify-between items-center p-4 h-[10%]">
+      <div className="flex justify-between items-center px-homepagePadding h-[10%]">
         {showNavbar && <Navbar />}
       </div>
       <div className=" flex flex-col justify-center items-center p-5 mt-2 h-[90%] overflow-hidden">

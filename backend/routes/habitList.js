@@ -330,6 +330,7 @@ router.get(
             },
 
             completedDays: { $size: "$completionDates" },
+            completedDaysStreak: "$completionDates",
           },
         },
 
@@ -370,67 +371,78 @@ router.get(
         {
           $addFields: {
             streaks: {
-              $cond: {
-                if: { $eq: ["$endDate", null] },
-                then: {
-                  $reduce: {
-                    input: {
-                      $sortArray: { input: "$completionDates", sortBy: 1 },
-                    },
-                    initialValue: {
-                      currentStreak: 0,
-                      maxStreak: 0,
-                      prevDate: null,
-                    },
-                    in: {
-                      $let: {
-                        vars: {
-                          dayDifference: {
-                            $cond: {
-                              if: { $ne: ["$$value.prevDate", null] },
-                              then: {
-                                $dateDiff: {
-                                  startDate: "$$value.prevDate",
-                                  endDate: "$$this",
-                                  unit: "day",
-                                },
-                              },
-                              else: 0,
-                            },
-                          },
+              $let: {
+                vars: {
+                  latestCompletedDate: { $arrayElemAt: ["$completedDaysStreak", -1] },
+                  // diff between last completed day and today
+                  dayDiff: {
+                    $dateDiff: {
+                      startDate: { $arrayElemAt: ["$completedDaysStreak", -1] },
+                      endDate: new Date(),
+                      unit: "day"
+                    }
+                  }
+                },
+                in: {
+                  $cond: {
+                    if: { $lte: ["$$dayDiff", 1] }, // If the last completion was within 1 day
+                    then: {
+                      $reduce: {
+                        input: { $sortArray: { input: "$completedDaysStreak", sortBy: 1 } },
+                        initialValue: {
+                          currentStreak: 0,
+                          maxStreak: 0,
+                          prevDate: null,
                         },
                         in: {
-                          $cond: {
-                            if: { $eq: ["$$value.prevDate", null] },
-                            then: {
-                              currentStreak: 1,
-                              maxStreak: 1,
-                              prevDate: "$$this",
+                          $let: {
+                            vars: {
+                              dayDifference: {
+                                $cond: {
+                                  if: { $ne: ["$$value.prevDate", null] },
+                                  then: {
+                                    $dateDiff: {
+                                      startDate: "$$value.prevDate",
+                                      endDate: "$$this",
+                                      unit: "day",
+                                    },
+                                  },
+                                  else: 0,
+                                },
+                              },
                             },
-                            else: {
+                            in: {
                               $cond: {
-                                if: { $eq: ["$$dayDifference", 1] },
+                                if: { $eq: ["$$value.prevDate", null] },
                                 then: {
-                                  currentStreak: {
-                                    $add: ["$$value.currentStreak", 1],
-                                  },
-                                  maxStreak: {
-                                    $max: [
-                                      "$$value.maxStreak",
-                                      { $add: ["$$value.currentStreak", 1] },
-                                    ],
-                                  },
+                                  currentStreak: 1,
+                                  maxStreak: 1,
                                   prevDate: "$$this",
                                 },
                                 else: {
-                                  currentStreak: 1,
-                                  maxStreak: {
-                                    $max: [
-                                      "$$value.maxStreak",
-                                      "$$value.currentStreak",
-                                    ],
+                                  $cond: {
+                                    if: { $lte: ["$$dayDifference", 1] },
+                                    then: {
+                                      currentStreak: { $add: ["$$value.currentStreak", 1] },
+                                      maxStreak: {
+                                        $max: [
+                                          "$$value.maxStreak",
+                                          { $add: ["$$value.currentStreak", 1] },
+                                        ],
+                                      },
+                                      prevDate: "$$this",
+                                    },
+                                    else: {
+                                      currentStreak: 1,
+                                      maxStreak: {
+                                        $max: [
+                                          "$$value.maxStreak",
+                                          "$$value.currentStreak",
+                                        ],
+                                      },
+                                      prevDate: "$$this",
+                                    },
                                   },
-                                  prevDate: "$$this",
                                 },
                               },
                             },
@@ -438,9 +450,9 @@ router.get(
                         },
                       },
                     },
+                    else: { currentStreak: 0, maxStreak: { $max: "$streaks.maxStreak" } }, // Reset streak if the difference is > 1
                   },
                 },
-                else: { currentStreak: 0, maxStreak: 0 },
               },
             },
           },
@@ -488,6 +500,7 @@ router.get(
             challengeStatus: 1,
             formattedStartDate: 1,
             formattedEndDate: 1,
+            // completedDays: 1,
           },
         },
       ]);

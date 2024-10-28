@@ -4,11 +4,11 @@ import { FaFacebook, FaTwitter, FaInstagram, FaLinkedin } from "react-icons/fa";
 const Footer = () => {
   return (
     <footer className="bg-darkestgreen text-white py-6">
-      <div className="container mx-auto px-6 flex flex-col md:flex-row items-center justify-between">
+      <div className="container mx-auto px-6 grid md:grid-cols-2 lg:grid-cols-3 gap-5 justify-center items-center">
         {/* Navigation Links */}
         <div className="mb-4 md:mb-0">
           <h3 className="text-lg font-semibold mb-2">Quick Links</h3>
-          <ul className="space-y-2">
+          <ul className="space-x-4 flex lg:space-y-2 lg:space-x-0 lg:flex-col">
             <li>
               <a href="#about" className="hover:text-gray-400">
                 About
@@ -80,7 +80,7 @@ const Footer = () => {
               href="mailto:support@habitandhustle.com"
               className="hover:text-gray-300"
             >
-              support@habitandhustle.com
+              support@habitura.com
             </a>
           </p>
           <p className="text-gray-400">
@@ -90,12 +90,13 @@ const Footer = () => {
             </a>
           </p>
         </div>
+
       </div>
 
       {/* copyright */}
       <div className="text-center text-sm mt-4 border-t border-gray-700 pt-4">
         <p className="text-gray-400">
-          &copy; 2024 Habit & Hustle. All rights reserved.
+          &copy; 2024 Habitura. All rights reserved.
         </p>
       </div>
       

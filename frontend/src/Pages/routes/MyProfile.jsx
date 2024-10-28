@@ -113,7 +113,7 @@ const MyProfile = () => {
   }, []);
 
   return (
-    <div className="lg:h-screen flex flex-col md:flex-row">
+    <div className="lg:h-screen flex flex-col lg:flex-row">
       <ToastProvider />
       <Sidebar />
       <div className="p-pagePadding bg-primary bg-opacity-opacityPrimary w-full h-full flex flex-col justify-center items-center">
